@@ -3,7 +3,9 @@ package com.kandi.controller;
 import com.kandi.pojo.Users;
 import com.kandi.pojo.bo.UserBO;
 import com.kandi.service.UserService;
+import com.kandi.utils.CookieUtils;
 import com.kandi.utils.JSONResult;
+import com.kandi.utils.JsonUtils;
 import com.kandi.utils.MD5Utils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,30 +44,29 @@ public class PassportController {
 
     @ApiOperation(value = "用户注册", notes = "用户注册", httpMethod = "POST")
     @PostMapping("/register")
-    public JSONResult register(@Valid @RequestBody UserBO userBO){
+    public JSONResult register(@Valid @RequestBody UserBO userBO,
+                               HttpServletRequest request,
+                               HttpServletResponse response){
         boolean isExist = userService.queryUserNameIsExist(userBO.getUsername());
         if(isExist){
             return JSONResult.errorMsg("用户名已经存在");
         }
         Users userResult = userService.createUser(userBO);
+        CookieUtils.setCookie(request, response, "user",
+                JsonUtils.objectToJson(userResult), true);
         return JSONResult.ok();
     }
 
 
     @ApiOperation(value = "用户登录", notes = "用户登录", httpMethod = "POST")
     @PostMapping("/login")
-    public JSONResult login(@RequestBody UserBO userBO,
+    public JSONResult login(@Valid @RequestBody UserBO userBO,
                                  HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
         String username = userBO.getUsername();
         String password = userBO.getPassword();
 
-        // 0. 判断用户名和密码必须不为空
-        if (StringUtils.isBlank(username) ||
-                StringUtils.isBlank(password)) {
-            return JSONResult.errorMsg("用户名或密码不能为空");
-        }
 
         // 1. 实现登录
         Users userResult = userService.queryUserForLogin(username,
@@ -76,7 +77,7 @@ public class PassportController {
         }
 
         //userResult = setNullProperty(userResult);
-
-        return JSONResult.ok();
+        CookieUtils.setCookie(request,response,"user", JsonUtils.objectToJson(userResult),true);
+        return JSONResult.ok(userResult);
     }
 }

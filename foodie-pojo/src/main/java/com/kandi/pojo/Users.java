@@ -1,5 +1,7 @@
 package com.kandi.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
 import java.util.Date;
@@ -17,8 +19,10 @@ public class Users {
     private String username;
 
     /**
-     * 密码 密码
+     * 密码 密码  JsonIgnore注解表示将ResponseBody中的Javabean返回前端过程中，
+     *            被springmvc自带的jackson转化成json字符串时，忽略这个属性
      */
+    @JsonIgnore
     private String password;
 
     /**
@@ -29,6 +33,7 @@ public class Users {
     /**
      * 真实姓名 真实姓名
      */
+    @JsonIgnore
     private String realname;
 
     /**
